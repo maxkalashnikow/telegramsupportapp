@@ -7,88 +7,98 @@
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         body {
-            /* Переменные --tg-theme автоматически заполняются Телеграмом */
             background-color: var(--tg-theme-bg-color, #ffffff);
             color: var(--tg-theme-text-color, #000000);
             font-family: sans-serif;
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: center;
-            height: 100vh;
-            margin: 0;
             padding: 20px;
-            box-sizing: border-box;
+            margin: 0;
         }
 
         #btn {
             padding: 15px 25px;
             font-size: 18px;
             font-weight: bold;
-            cursor: pointer;
-            border: none;
-            border-radius: 12px;
-            /* Кнопка будет в цвет темы пользователя */
             background-color: var(--tg-theme-button-color, #248bcf);
             color: var(--tg-theme-button-text-color, #ffffff);
-            transition: transform 0.1s ease;
+            border: none;
+            border-radius: 12px;
+            margin-top: 20px;
+            width: 100%;
+            max-width: 300px;
         }
 
-        #btn:active {
-            transform: scale(0.95);
+        /* Контейнер для вывода текста */
+        #log-container {
+            width: 100%;
+            max-width: 300px;
+            margin-top: 20px;
+            padding: 10px;
+            border-top: 1px solid var(--tg-theme-hint-color, #ccc);
         }
 
-        p {
-            margin-bottom: 20px;
-            font-size: 16px;
-            text-align: center;
+        .log-item {
+            background: var(--tg-theme-secondary-bg-color, #f0f0f0);
+            padding: 8px;
+            margin-bottom: 5px;
+            border-radius: 8px;
+            font-size: 14px;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
         }
     </style>
 </head>
 <body>
 
-    <p id="welcome-text">Загрузка данных...</p>
-    <button id="btn">Нажми на меня!</button>
+    <p id="welcome-text">Загрузка...</p>
+    <button id="btn">Нажми меня!</button>
+
+    <div id="log-container"></div>
 
     <script>
-        // Инициализируем объект WebApp
         const tg = window.Telegram.WebApp;
-
-        // Сообщаем, что приложение готово и расширяем его
         tg.ready();
         tg.expand();
 
-        const welcomeText = document.getElementById("welcome-text");
         const btn = document.getElementById("btn");
-
-        // 1. Пытаемся получить данные пользователя
+        const logContainer = document.getElementById("log-container");
         const user = tg.initDataUnsafe?.user;
+
         if (user) {
-            welcomeText.innerText = `Привет, ${user.first_name}! Это твой первый Mini App.`;
-            btn.innerText = `Нажать как ${user.first_name}`;
-        } else {
-            welcomeText.innerText = "Привет! Открой меня через Telegram, чтобы увидеть магию.";
+            document.getElementById("welcome-text").innerText = `Пользователь: ${user.first_name}`;
         }
 
-        // 2. Логика кнопки на странице
+        // Функция для вывода текста на страницу
+        function printToScreen(message) {
+            const newItem = document.createElement("div");
+            newItem.className = "log-item";
+            newItem.innerText = `[${new Date().toLocaleTimeString()}] ${message}`;
+            
+            // Добавляем новый текст в начало списка
+            logContainer.prepend(newItem);
+        }
+
+        // Клик по кнопке на странице
         btn.addEventListener("click", () => {
-            tg.showAlert("Ура! Кнопка на странице работает.");
+            printToScreen("Кнопка нажата! Hello World!");
         });
 
-        // 3. Настройка главной кнопки (MainButton) внизу экрана
-        tg.MainButton.text = "ГЛАВНАЯ КНОПКА";
-        tg.MainButton.color = "#2ecc71"; // Зеленый цвет
-        tg.MainButton.textColor = "#ffffff";
-        tg.MainButton.show(); // Показываем её
+        // Настройка главной кнопки (MainButton)
+        tg.MainButton.setParams({
+            text: "ВЫВЕСТИ ТЕКСТ",
+            is_visible: true,
+            color: "#31b545"
+        });
 
-        // Обработка клика по главной кнопке
+        // Клик по нижней кнопке тоже выводит текст на экран
         tg.MainButton.onClick(() => {
             printToScreen("Нажата нижняя кнопка!");
-            // tg.showConfirm("Ты нажал на нижнюю кнопку! Закрыть приложение?", (confirmed) => {
-            //     if (confirmed) {
-            //         tg.close(); // Закрыть Mini App
-            //     }
-            // });
         });
     </script>
 </body>
