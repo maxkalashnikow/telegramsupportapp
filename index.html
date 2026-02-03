@@ -83,11 +83,12 @@
 
         // Обработка клика по главной кнопке
         tg.MainButton.onClick(() => {
-            tg.showConfirm("Ты нажал на нижнюю кнопку! Закрыть приложение?", (confirmed) => {
-                if (confirmed) {
-                    tg.close(); // Закрыть Mini App
-                }
-            });
+            printToScreen("Нажата нижняя кнопка!");
+            // tg.showConfirm("Ты нажал на нижнюю кнопку! Закрыть приложение?", (confirmed) => {
+            //     if (confirmed) {
+            //         tg.close(); // Закрыть Mini App
+            //     }
+            // });
         });
     </script>
 </body>
