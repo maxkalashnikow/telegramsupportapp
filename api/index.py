@@ -1,0 +1,35 @@
+import os
+from flask import Flask, jsonify
+import requests
+
+app = Flask(__name__)
+
+# Данные твоего Битрикс24
+BITRIX_URL = os.environ.get("BITRIX_URL")
+
+@app.route('/api/get_fields')
+def get_fields():
+    # Получаем ID из параметров запроса, например: /api/get_fields?id=150
+    entity_type_id = 1044
+    BITRIX_BASE_URL = "https://crystalice.bitrix24.kz/"
+    if not entity_type_id:
+        return jsonify({"error": "entityTypeId is required"}), 400
+    
+    # Формируем запрос к Битрикс24
+    method = "crm.item.fields"
+    url = f"{BITRIX_BASE_URL}{method}?entityTypeId={entity_type_id}"
+    
+    try:
+        response = requests.get(url)
+        data = response.json()
+        
+        # Возвращаем только поля (result -> fields)
+        if 'result' in data and 'fields' in data['result']:
+            return jsonify(data['result']['fields'])
+        else:
+            return jsonify({"error": "Fields not found in Bitrix response"}), 404
+            
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+if __name__ == '__main__':
+    app.run()
