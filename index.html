@@ -1,53 +1,94 @@
 <!DOCTYPE html>
-<html>
+<html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title>My First Mini App</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Telegram Mini App</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         body {
+            /* Переменные --tg-theme автоматически заполняются Телеграмом */
+            background-color: var(--tg-theme-bg-color, #ffffff);
+            color: var(--tg-theme-text-color, #000000);
+            font-family: sans-serif;
             display: flex;
-            justify-content: center;
+            flex-direction: column;
             align-items: center;
+            justify-content: center;
             height: 100vh;
-            background-color: var(--tg-theme-bg-color); /* Используем цвета темы Telegram */
+            margin: 0;
+            padding: 20px;
+            box-sizing: border-box;
         }
-        button {
-            padding: 15px 30px;
+
+        #btn {
+            padding: 15px 25px;
             font-size: 18px;
-            background-color: var(--tg-theme-button-color);
-            color: var(--tg-theme-button-text-color);
-            border: none;
-            border-radius: 8px;
+            font-weight: bold;
             cursor: pointer;
+            border: none;
+            border-radius: 12px;
+            /* Кнопка будет в цвет темы пользователя */
+            background-color: var(--tg-theme-button-color, #248bcf);
+            color: var(--tg-theme-button-text-color, #ffffff);
+            transition: transform 0.1s ease;
+        }
+
+        #btn:active {
+            transform: scale(0.95);
+        }
+
+        p {
+            margin-bottom: 20px;
+            font-size: 16px;
+            text-align: center;
         }
     </style>
 </head>
 <body>
-    <button id="btn">Нажми меня!</button>
+
+    <p id="welcome-text">Загрузка данных...</p>
+    <button id="btn">Нажми на меня!</button>
 
     <script>
-        let tg = window.Telegram.WebApp;
-let user = tg.initDataUnsafe.user;
+        // Инициализируем объект WebApp
+        const tg = window.Telegram.WebApp;
 
-    if (user) {
-        // Выведет имя пользователя на экран
-        document.getElementById("btn").innerText = `Привет, ${user.first_name}!`;
-    }
-        tg.expand(); // Расширяем на все окно
+        // Сообщаем, что приложение готово и расширяем его
+        tg.ready();
+        tg.expand();
 
-        let btn = document.getElementById("btn");
+        const welcomeText = document.getElementById("welcome-text");
+        const btn = document.getElementById("btn");
 
+        // 1. Пытаемся получить данные пользователя
+        const user = tg.initDataUnsafe?.user;
+        if (user) {
+            welcomeText.innerText = `Привет, ${user.first_name}! Это твой первый Mini App.`;
+            btn.innerText = `Нажать как ${user.first_name}`;
+        } else {
+            welcomeText.innerText = "Привет! Открой меня через Telegram, чтобы увидеть магию.";
+        }
+
+        // 2. Логика кнопки на странице
         btn.addEventListener("click", () => {
-            // Показываем стандартное окно Telegram Alert
-            tg.showAlert("Hello World!");
+            tg.showAlert("Ура! Кнопка на странице работает.");
         });
-        tg.MainButton.text = "Подтвердить действие";
-tg.MainButton.show(); // Показывает большую кнопку внизу
 
-tg.MainButton.onClick(function() {
-    tg.showAlert("Вы нажали на главную кнопку!");
-});
+        // 3. Настройка главной кнопки (MainButton) внизу экрана
+        tg.MainButton.text = "ГЛАВНАЯ КНОПКА";
+        tg.MainButton.color = "#2ecc71"; // Зеленый цвет
+        tg.MainButton.textColor = "#ffffff";
+        tg.MainButton.show(); // Показываем её
+
+        // Обработка клика по главной кнопке
+        tg.MainButton.onClick(() => {
+            tg.showConfirm("Ты нажал на нижнюю кнопку! Закрыть приложение?", (confirmed) => {
+                if (confirmed) {
+                    tg.close(); // Закрыть Mini App
+                }
+            });
+        });
     </script>
 </body>
 </html>
