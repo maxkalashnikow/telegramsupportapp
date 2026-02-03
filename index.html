@@ -27,7 +27,13 @@
     <button id="btn">Нажми меня!</button>
 
     <script>
-        let tg = window.Telegram.WebApp; // Инициализация
+        let tg = window.Telegram.WebApp;
+let user = tg.initDataUnsafe.user;
+
+    if (user) {
+        // Выведет имя пользователя на экран
+        document.getElementById("btn").innerText = `Привет, ${user.first_name}!`;
+    }
         tg.expand(); // Расширяем на все окно
 
         let btn = document.getElementById("btn");
@@ -36,6 +42,12 @@
             // Показываем стандартное окно Telegram Alert
             tg.showAlert("Hello World!");
         });
+        tg.MainButton.text = "Подтвердить действие";
+tg.MainButton.show(); // Показывает большую кнопку внизу
+
+tg.MainButton.onClick(function() {
+    tg.showAlert("Вы нажали на главную кнопку!");
+});
     </script>
 </body>
 </html>
