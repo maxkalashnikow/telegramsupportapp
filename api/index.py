@@ -54,5 +54,36 @@ def get_fields():
     except Exception as e:
         return jsonify({"status": "error", "message": str(e)}), 500
 
+@app.route('/api/create_item', methods=['POST'])
+def create_item():
+    bitrix_url = os.environ.get("BITRIX_URL")
+    entity_type_id = 1044  # Твой ID смарт-процесса
+    
+    try:
+        # Получаем данные из JS (мы будем отправлять JSON)
+        incoming_data = request.json
+        
+        # Формируем запрос к Битриксу
+        # Метод crm.item.add для смарт-процессов
+        method = "crm.item.add"
+        url = f"{bitrix_url}{method}"
+        
+        payload = {
+            "entityTypeId": entity_type_id,
+            "fields": incoming_data
+        }
+        
+        response = requests.post(url, json=payload)
+        result = response.json()
+        
+        if 'result' in result:
+            return jsonify({"status": "success", "id": result['result']['item']['id']})
+        else:
+            return jsonify({"status": "error", "details": result}), 400
+
+    except Exception as e:
+        return jsonify({"status": "error", "message": str(e)}), 500
+    
+    
 if __name__ == '__main__':
     app.run(debug=True)

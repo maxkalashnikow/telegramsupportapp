@@ -75,3 +75,65 @@ async function loadForm() {
 
 // Запускаем функцию
 loadForm();
+
+// 1. Помощник для перевода файла в строку (Base64), которую понимает Битрикс
+const fileToBase64 = (file) => new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = () => resolve(reader.result.split(',')[1]); // Отрезаем технический заголовок
+    reader.onerror = error => reject(error);
+});
+
+// 2. Слушатель события отправки формы
+document.getElementById('dynamic-form').addEventListener('submit', async (e) => {
+    e.preventDefault(); // Чтобы страница не перезагружалась
+    
+    const btn = document.getElementById('submit-btn');
+    const originalBtnText = btn.textContent;
+    
+    // Визуальный отклик
+    btn.disabled = true;
+    btn.textContent = 'Создаем запись...';
+
+    const formData = new FormData(e.target);
+    const fieldsData = {};
+
+    try {
+        // Проходим по всем полям и готовим их для API
+        for (let [key, value] of formData.entries()) {
+            if (value instanceof File && value.name) {
+                // Обработка файла
+                const base64 = await fileToBase64(value);
+                fieldsData[key] = [value.name, base64];
+            } else if (value !== "" && value !== undefined) {
+                // Обработка обычных строк и списков
+                fieldsData[key] = value;
+            }
+        }
+
+        console.log("Данные к отправке:", fieldsData);
+
+        // Отправляем на наш Python-бэкенд
+        const response = await fetch('/api/create_item', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(fieldsData)
+        });
+
+        const result = await response.json();
+
+        if (result.status === 'success') {
+            alert('Ура! Элемент создан. ID: ' + result.id);
+            e.target.reset(); // Очищаем форму
+        } else {
+            console.error("Ошибка Битрикса:", result.details);
+            alert('Битрикс не принял данные. Проверь консоль.');
+        }
+    } catch (error) {
+        console.error("Ошибка сети или скрипта:", error);
+        alert('Не удалось отправить форму: ' + error.message);
+    } finally {
+        btn.disabled = false;
+        btn.textContent = originalBtnText;
+    }
+});
