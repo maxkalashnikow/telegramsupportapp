@@ -1,39 +1,26 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html>
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Форма Смарт-процесса</title>
+    <title>Support Bot</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <link rel="stylesheet" href="/static/style.css">
 </head>
 <body>
+    <div class="container">
+        <div id="registration-container" style="display:none;">
+            <h2>Первый вход</h2>
+            <p>Введите ваш ID из Битрикс24 для привязки аккаунта:</p>
+            <input type="number" id="reg-bitrix-id" placeholder="Ваш ID (например 123)">
+            <button onclick="registerUser()">Привязать аккаунт</button>
+        </div>
 
-    <div id="app">
-        <div id="registration-container" style="display: none;" class="fade-in">
-    <h3>Регистрация пользователя</h3>
-    <p style="font-size: 14px; color: #666;">Ваш Telegram ник не найден в системе. Пожалуйста, введите ваш ID из Битрикс24.</p>
-    <div class="field-group">
-        <label>Ваш ID в Битрикс24</label>
-        <input type="number" id="reg-bitrix-id" placeholder="Например: 125">
-    </div>
-    <button id="reg-btn" onclick="registerUser()">Привязать аккаунт</button>
-</div>
-
-<form id="dynamic-form" style="display: none;">
-    <div id="form-container"></div>
-    <button type="submit" id="submit-btn">Отправить</button>
-</form>
-        <h3>Новая заявка</h3>
-
-        
-        <form id="dynamic-form">
-    <div id="form-container"> <p>Загрузка полей...</p>
-    </div>
-    <button type="submit" id="submit-btn">Отправить</button>
+        <form id="dynamic-form" style="display:none;">
+            <h2>Создать тикет</h2>
+            <div id="form-container">Загрузка полей...</div>
+            <button type="submit">Отправить в поддержку</button>
         </form>
-
     </div>
-
     <script src="/static/script.js"></script>
 </body>
 </html>

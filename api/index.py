@@ -5,7 +5,7 @@ from upstash_redis import Redis
 
 app = Flask(__name__)
 
-# Используем переменные KV, которые мы видели на скриншоте
+# Инициализация Redis через переменные Vercel KV
 def get_redis():
     url = os.environ.get("KV_REST_API_URL")
     token = os.environ.get("KV_REST_API_TOKEN")
@@ -17,16 +17,14 @@ def get_redis():
 def check_user():
     redis = get_redis()
     if not redis:
-        return jsonify({"status": "error", "message": "DB config missing"}), 500
+        return jsonify({"status": "error", "message": "Database not connected"}), 500
     
     tg_nick = request.args.get('tg')
     if not tg_nick:
-        return jsonify({"status": "error", "message": "No nickname"}), 400
+        return jsonify({"status": "error", "message": "No nickname provided"}), 400
     
-    # Пытаемся получить ID. Если ника нет, вернется None
     bitrix_id = redis.get(tg_nick)
     if bitrix_id:
-        # Убеждаемся, что возвращаем строку или число
         return jsonify({"status": "found", "bitrix_id": str(bitrix_id)})
     return jsonify({"status": "not_found"})
 
@@ -44,14 +42,13 @@ def save_user():
 
 @app.route('/api/get_fields')
 def get_fields():
-    # ТВОЙ КОД ЗАПРОСА К БИТРИКСУ
-    # Здесь должен быть вызов метода user.fields или crm.item.fields
-    # Для теста я возвращаю структуру, которую ждет твой JS:
-    test_fields = {
+    # ВАЖНО: Замени этот словарь на реальный вызов Битрикс24, если нужно.
+    # Сейчас это тестовые данные, чтобы форма отрисовалась.
+    return jsonify({
         "status": "success",
         "fields": {
-            "TITLE": {"title": "Название задачи", "type": "string"},
-            "UF_CRM_123": {"title": "ID пользователя", "type": "number"}
+            "TITLE": {"title": "Тема обращения", "type": "string"},
+            "COMMENTS": {"title": "Описание проблемы", "type": "text"},
+            "FILE": {"title": "Скриншот", "type": "file"}
         }
-    }
-    return jsonify(test_fields)
+    })
