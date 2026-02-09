@@ -13,20 +13,23 @@ def get_redis():
         return None
     return Redis(url=url, token=token)
 
-@app.route('/api/check_user')
-def check_user():
-    redis = get_redis()
-    if not redis:
-        return jsonify({"status": "error", "message": "Database not connected"}), 500
-    
-    tg_nick = request.args.get('tg')
-    if not tg_nick:
-        return jsonify({"status": "error", "message": "No nickname provided"}), 400
-    
-    bitrix_id = redis.get(tg_nick)
-    if bitrix_id:
-        return jsonify({"status": "found", "bitrix_id": str(bitrix_id)})
-    return jsonify({"status": "not_found"})
+@app.route('/api/get_fields')
+def get_fields():
+    return jsonify({
+        "status": "success",
+        "fields": {
+            "TITLE": {"title": "Тема", "type": "string"},
+            "UF_CRM_CATEGORY": {
+                "title": "Категория", 
+                "type": "enumeration", 
+                "items": [
+                    {"ID": "1", "VALUE": "Техническая поддержка"},
+                    {"ID": "2", "VALUE": "Финансы"}
+                ]
+            },
+            "UF_CRM_FILE": {"title": "Скриншот", "type": "file"}
+        }
+    })
 
 @app.route('/api/save_user', methods=['POST'])
 def save_user():
