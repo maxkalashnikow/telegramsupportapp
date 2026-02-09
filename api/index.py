@@ -1,6 +1,7 @@
-from flask import Flask, jsonify, request
-import requests
 import os
+import requests
+from flask import Flask, jsonify, request
+from dotenv import load_dotenv
 
 load_dotenv()
 app = Flask(__name__)
@@ -83,6 +84,6 @@ def create_item():
     except Exception as e:
         return jsonify({"status": "error", "message": str(e)}), 500
     
-
+    
 if __name__ == '__main__':
     app.run(debug=True)
