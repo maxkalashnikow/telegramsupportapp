@@ -53,8 +53,43 @@ async function loadForm() {
                     input.appendChild(opt);
                 });
             } else {
-                input = document.createElement('input');
-                input.type = info.type === 'file' ? 'file' : 'text';
+                   if (info.type === 'file') {
+    // Создаем обертку
+    const fileWrapper = document.createElement('div');
+    fileWrapper.style.display = 'flex';
+    fileWrapper.style.alignItems = 'center';
+
+    // Настоящий скрытый инпут
+    input = document.createElement('input');
+    input.type = 'file';
+    input.name = id;
+    input.id = 'file_' + id;
+    input.className = 'file-input';
+
+    // Красивый label
+    const label = document.createElement('label');
+    label.htmlFor = 'file_' + id;
+    label.className = 'file-label';
+    label.textContent = 'Выберите файл';
+
+    // Текст для отображения имени файла
+    const fileNameSpan = document.createElement('span');
+    fileNameSpan.className = 'file-name-display';
+    fileNameSpan.textContent = 'Файл не выбран';
+
+    // Слушатель: когда файл выбран, меняем текст
+    input.addEventListener('change', (e) => {
+        const fileName = e.target.files[0] ? e.target.files[0].name : 'Файл не выбран';
+        fileNameSpan.textContent = fileName;
+    });
+
+    fileWrapper.appendChild(input);
+    fileWrapper.appendChild(label);
+    fileWrapper.appendChild(fileNameSpan);
+    wrapper.appendChild(fileWrapper);
+}
+                // input = document.createElement('input');
+                // input.type = info.type === 'file' ? 'file' : 'text';
             }
 
             input.name = id;

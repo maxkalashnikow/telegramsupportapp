@@ -69,7 +69,49 @@ input:focus, select:focus {
     box-shadow: 0 0 0 3px rgba(47, 198, 246, 0.1);
     background-color: #fff;
 }
+/* Скрываем стандартный неуклюжий инпут */
+.file-input {
+    width: 0.1px;
+    height: 0.1px;
+    opacity: 0;
+    overflow: hidden;
+    position: absolute;
+    z-index: -1;
+}
 
+/* Стилизуем label как красивую кнопку */
+.file-label {
+    display: inline-flex;
+    align-items: center;
+    padding: 10px 20px;
+    background-color: #2fc6f6;
+    color: white;
+    border-radius: var(--border-radius);
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.2s ease;
+    border: 1px solid #2fc6f6;
+}
+
+.file-label:hover {
+    background-color: #0b93bf;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+/* Иконка облака (через CSS символ или SVG) */
+.file-label::before {
+    content: '☁'; /* Можно заменить на иконку из FontAwesome */
+    margin-right: 10px;
+    font-size: 18px;
+}
+
+/* Место для отображения имени выбранного файла */
+.file-name-display {
+    margin-left: 15px;
+    font-size: 14px;
+    color: #666;
+    font-style: italic;
+}
 /* Стилизация кнопки */
 #submit-btn {
     width: 100%;
