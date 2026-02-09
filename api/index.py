@@ -1,34 +1,58 @@
 import os
-from flask import Flask, jsonify
 import requests
+from flask import Flask, jsonify
+from dotenv import load_dotenv
 
+load_dotenv()
 app = Flask(__name__)
 
-# Данные твоего Битрикс24
-
+# 1. Твой белый список полей (добавь сюда ID своих полей из Битрикса)
+ALLOWED_FIELDS = [
+    'TITLE',                # Название
+    'UF_CRM_13_1764583294',            # Файловое
+    'UF_CRM_13_1764583266',   # Списковое
+     # Поле для файлов
+]
 
 @app.route('/api/get_fields')
 def get_fields():
-    # Получаем ID из параметров запроса, например: /api/get_fields?id=150
+    bitrix_url = os.environ.get("BITRIX_URL")
     entity_type_id = 1044
-    BITRIX_URL = os.environ.get("BITRIX_URL")
-       
-    # Формируем запрос к Битрикс24
+    
+    # Запрос всех полей смарт-процесса
     method = "crm.item.fields"
-    url = f"{BITRIX_URL}{method}?entityTypeId={entity_type_id}"
-   
+    url = f"{bitrix_url}{method}?entityTypeId={entity_type_id}"
     
     try:
         response = requests.get(url)
         data = response.json()
         
-        # Возвращаем только поля (result -> fields)
-        if 'result' in data and 'fields' in data['result']:
-            return jsonify(data['result']['fields'])
-        else:
-            return jsonify({"error": "Fields not found in Bitrix response"}), 404
+        if 'result' not in data:
+            return jsonify({"error": "Failed to get fields from Bitrix", "details": data}), 400
             
+        all_fields = data['result']['fields']
+        
+        # 2. Фильтрация по белому списку
+        filtered_fields = {}
+        for field_id in ALLOWED_FIELDS:
+            if field_id in all_fields:
+                field_data = all_fields[field_id]
+                
+                # Собираем только нужную информацию для фронтенда
+                filtered_fields[field_id] = {
+                    "title": field_data.get('title'),
+                    "type": field_data.get('type'),
+                    "isRequired": field_data.get('isRequired', False),
+                }
+                
+                # 3. Если это список (enumeration), забираем варианты выбора
+                if field_data.get('type') == 'enumeration':
+                    filtered_fields[field_id]['items'] = field_data.get('items', [])
+
+        return jsonify({"status": "success", "fields": filtered_fields})
+
     except Exception as e:
-        return jsonify({"error": str(e)}), 500
+        return jsonify({"status": "error", "message": str(e)}), 500
+
 if __name__ == '__main__':
-    app.run()
+    app.run(debug=True)

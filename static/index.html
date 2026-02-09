@@ -1,96 +1,27 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html>
 <head>
-    <meta charset="UTF-8">
+    <title>Bitrix Form</title>
+    <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bitrix Debug App</title>
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
-        body {
-            background-color: var(--tg-theme-bg-color, #ffffff);
-            color: var(--tg-theme-text-color, #000000);
-            font-family: sans-serif;
-            padding: 20px;
-            margin: 0;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-        #btn {
-            width: 100%;
-            max-width: 300px;
-            padding: 15px;
-            background-color: var(--tg-theme-button-color, #248bcf);
-            color: var(--tg-theme-button-text-color, #ffffff);
-            border: none;
-            border-radius: 10px;
-            font-weight: bold;
-            cursor: pointer;
-        }
-        #log-container {
-            width: 100%;
-            margin-top: 20px;
-            font-family: monospace;
-            font-size: 12px;
-            word-wrap: break-word;
-        }
-        .log-item {
-            background: var(--tg-theme-secondary-bg-color, #f0f0f0);
-            padding: 10px;
-            margin-bottom: 10px;
-            border-radius: 8px;
-            border-left: 4px solid var(--tg-theme-button-color);
-        }
-        .error { border-left-color: #e74c3c; color: #e74c3c; }
+        .field-group { margin-bottom: 15px; display: flex; flex-direction: column; }
+        .field-group label { font-weight: bold; margin-bottom: 5px; }
+        .field-group input, .field-group select { padding: 8px; border: 1px solid #ccc; border-radius: 4px; }
+        .required::after { content: " *"; color: red; }
     </style>
 </head>
 <body>
+    <div id="app">
+        <h2>Заполнение заявки</h2>
+        <form id="dynamic-form">
+            <div id="form-container">
+                <p>Загрузка полей...</p>
+            </div>
+            <button type="submit" style="margin-top: 20px;">Создать элемент</button>
+        </form>
+    </div>
 
-    <button id="btn">ПОЛУЧИТЬ ПОЛЯ ИЗ БИТРИКСА</button>
-    <div id="log-container"></div>
-
-    <script>
-        const tg = window.Telegram.WebApp;
-        tg.ready();
-        tg.expand();
-
-        const btn = document.getElementById("btn");
-        const logContainer = document.getElementById("log-container");
-
-        function printLog(message, isError = false) {
-            const div = document.createElement("div");
-            div.className = `log-item ${isError ? 'error' : ''}`;
-            div.innerText = typeof message === 'object' 
-                ? JSON.stringify(message, null, 2) 
-                : message;
-            logContainer.prepend(div);
-        }
-
-        btn.addEventListener("click", async () => {
-            printLog("Запрос отправлен...");
-            
-            try {
-                // Запрашиваем твой API на Vercel
-                // Укажи свой ID смарт-процесса (например, 150)
-                const response = await fetch('/api/get_fields?id=150');
-                
-                if (!response.ok) {
-                    throw new Error(`Ошибка сервера: ${response.status}`);
-                }
-
-                const fields = await response.json();
-
-                if (fields.error) {
-                    printLog(`Ошибка Битрикса: ${fields.error_description || fields.error}`, true);
-                } else {
-                    printLog("Успех! Получены поля:");
-                    printLog(fields); // Выведет весь JSON на экран
-                }
-
-            } catch (err) {
-                printLog(`Сетевая ошибка: ${err.message}`, true);
-            }
-        });
-    </script>
+    <script src="script.js"></script>
 </body>
 </html>
