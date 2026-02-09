@@ -2,36 +2,45 @@ let currentBitrixUserId = null;
 const urlParams = new URLSearchParams(window.location.search);
 const tgNick = urlParams.get('tg');
 
+const tele = window.Telegram.WebApp;
+tele.ready(); // Сообщаем Telegram, что приложение готово
+
+// Пытаемся получить ник пользователя из Telegram
+const tgUser = tele.initDataUnsafe?.user;
+const tgNick = tgUser?.username || tgUser?.id?.toString(); 
+
 async function initApp() {
-    console.log("Инициализация для ника:", tgNick);
+    console.log("Данные из Telegram:", tgUser);
     
     const regContainer = document.getElementById('registration-container');
     const mainForm = document.getElementById('dynamic-form');
 
+    // Если ник не удалось получить (например, открыли в обычном браузере)
     if (!tgNick) {
-        alert("Ошибка: Ник не указан в URL (?tg=...)");
+        document.getElementById('form-container').innerHTML = 
+            "Пожалуйста, откройте это приложение внутри Telegram.";
         return;
     }
 
     try {
+        // Теперь запрос пойдет с настоящим ником из Telegram
         const response = await fetch(`/api/check_user?tg=${tgNick}`);
         const data = await response.json();
-        console.log("Ответ от базы:", data);
 
         if (data.status === 'found') {
             currentBitrixUserId = data.bitrix_id;
-            if (regContainer) regContainer.style.display = 'none';
-            if (mainForm) mainForm.style.display = 'block';
-            loadForm(); // Рисуем поля только если юзер найден
+            regContainer.style.display = 'none';
+            mainForm.style.display = 'block';
+            loadForm();
         } else {
-            if (regContainer) regContainer.style.display = 'block';
-            if (mainForm) mainForm.style.display = 'none';
+            // Если ника нет в Redis, показываем окно привязки ID Битрикса
+            regContainer.style.display = 'block';
+            mainForm.style.display = 'none';
         }
     } catch (err) {
-        console.error("Ошибка при проверке пользователя:", err);
+        console.error("Ошибка:", err);
     }
 }
-
 async function registerUser() {
     const bitrixId = document.getElementById('reg-bitrix-id').value;
     if (!bitrixId) return alert("Введите ID!");
