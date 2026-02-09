@@ -5,19 +5,17 @@ import requests
 app = Flask(__name__)
 
 # Данные твоего Битрикс24
-BITRIX_URL = os.environ.get("BITRIX_URL")
+
 
 @app.route('/api/get_fields')
 def get_fields():
     # Получаем ID из параметров запроса, например: /api/get_fields?id=150
     entity_type_id = 1044
-    BITRIX_BASE_URL = "https://crystalice.bitrix24.kz/"
-    if not entity_type_id:
-        return jsonify({"error": "entityTypeId is required"}), 400
-    
+    BITRIX_URL = os.environ.get("BITRIX_URL")
+       
     # Формируем запрос к Битрикс24
     method = "crm.item.fields"
-    url = f"{BITRIX_BASE_URL}{method}?entityTypeId={entity_type_id}"
+    url = f"{BITRIX_URL}{method}?entityTypeId={entity_type_id}"
     
     try:
         response = requests.get(url)
