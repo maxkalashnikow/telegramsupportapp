@@ -1,41 +1,35 @@
-from http.server import BaseHTTPRequestHandler
-import json
 import os
+from flask import Flask, jsonify
 import requests
 
-BITRIX_WEBHOOK_BASE = os.environ.get("BITRIX_URL")
-DEFAULT_ENTITY_TYPE_ID = os.environ.get("ENTITY_TYPE_ID", "1044")
+app = Flask(__name__)
 
+# Данные твоего Битрикс24
+BITRIX_URL = os.environ.get("BITRIX_URL")
 
-class handler(BaseHTTPRequestHandler):
-
-    def do_GET(self):
-        try:
-            if not BITRIX_WEBHOOK_BASE:
-                raise Exception("BITRIX_WEBHOOK_BASE is not set")
-
-            # entityTypeId из URL: /api/get_fields?id=150
-            entity_type_id = DEFAULT_ENTITY_TYPE_ID
-
-            method = "crm.item.fields"
-            url = f"{BITRIX_WEBHOOK_BASE}{method}?entityTypeId={entity_type_id}"
-
-            response = requests.get(url, timeout=10)
-            data = response.json()
-
-            if "result" in data and "fields" in data["result"]:
-                result = data["result"]["fields"]
-                self.send_response(200)
-            else:
-                result = data
-                self.send_response(500)
-
-        except Exception as e:
-            result = {"error": str(e)}
-            self.send_response(500)
-
-        self.send_header("Content-Type", "application/json; charset=utf-8")
-        self.send_header("Access-Control-Allow-Origin", "*")
-        self.end_headers()
-
-        self.wfile.write(json.dumps(result, ensure_ascii=False).encode())
+@app.route('/api/get_fields')
+def get_fields():
+    # Получаем ID из параметров запроса, например: /api/get_fields?id=150
+    entity_type_id = 1044
+    BITRIX_BASE_URL = "https://crystalice.bitrix24.kz/"
+    if not entity_type_id:
+        return jsonify({"error": "entityTypeId is required"}), 400
+    
+    # Формируем запрос к Битрикс24
+    method = "crm.item.fields"
+    url = f"{BITRIX_BASE_URL}{method}?entityTypeId={entity_type_id}"
+    
+    try:
+        response = requests.get(url)
+        data = response.json()
+        
+        # Возвращаем только поля (result -> fields)
+        if 'result' in data and 'fields' in data['result']:
+            return jsonify(data['result']['fields'])
+        else:
+            return jsonify({"error": "Fields not found in Bitrix response"}), 404
+            
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+if __name__ == '__main__':
+    app.run()
