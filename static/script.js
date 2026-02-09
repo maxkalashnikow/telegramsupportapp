@@ -7,106 +7,68 @@ async function loadForm() {
         return;
     }
 
-    try {
-        console.log("Запрос данных от /api/get_fields...");
-        const response = await fetch('/api/get_fields');
-        
-        if (!response.ok) {
-            throw new Error(`Ошибка сети: ${response.status}`);
-        }
+    fieldsEntries.forEach(([id, info]) => {
+    const wrapper = document.createElement('div');
+    wrapper.className = 'field-group fade-in';
 
-        const data = await response.json();
-        console.log("Данные получены успешно:", data);
-
-        if (data.status !== 'success' || !data.fields) {
-            container.innerHTML = `<p style="color:orange">Бэкенд не вернул поля. Статус: ${data.status}</p>`;
-            return;
-        }
-
-        // Очищаем контейнер перед отрисовкой
-        container.innerHTML = '';
-
-        const fieldsEntries = Object.entries(data.fields);
-        if (fieldsEntries.length === 0) {
-            container.innerHTML = '<p>Список полей пуст. Проверь ALLOWED_FIELDS в Python.</p>';
-            return;
-        }
-
-        // Рисуем поля
-        fieldsEntries.forEach(([id, info]) => {
-            console.log(`Отрисовка поля: ${id}`);
-            const wrapper = document.createElement('div');
-            wrapper.style.marginBottom = "15px";
-
-            const label = document.createElement('label');
-            label.innerHTML = `<b>${info.title || id}</b>`;
-            label.style.display = "block";
-            wrapper.appendChild(label);
-
-            let input;
-            if (info.type === 'enumeration') {
-                input = document.createElement('select');
-                info.items.forEach(item => {
-                    const opt = document.createElement('option');
-                    opt.value = item.ID;
-                    opt.textContent = item.VALUE;
-                    input.appendChild(opt);
-                });
-            } else {
-                   if (info.type === 'file') {
-    // Создаем обертку
-    const fileWrapper = document.createElement('div');
-    fileWrapper.style.display = 'flex';
-    fileWrapper.style.alignItems = 'center';
-
-    // Настоящий скрытый инпут
-    input = document.createElement('input');
-    input.type = 'file';
-    input.name = id;
-    input.id = 'file_' + id;
-    input.className = 'file-input';
-
-    // Красивый label
     const label = document.createElement('label');
-    label.htmlFor = 'file_' + id;
-    label.className = 'file-label';
-    label.textContent = 'Выберите файл';
+    label.innerHTML = `<b>${info.title || id}</b>`;
+    wrapper.appendChild(label);
 
-    // Текст для отображения имени файла
-    const fileNameSpan = document.createElement('span');
-    fileNameSpan.className = 'file-name-display';
-    fileNameSpan.textContent = 'Файл не выбран';
+    let input; // Объявляем переменную здесь, чтобы она была доступна везде ниже
 
-    // Слушатель: когда файл выбран, меняем текст
-    input.addEventListener('change', (e) => {
-        const fileName = e.target.files[0] ? e.target.files[0].name : 'Файл не выбран';
-        fileNameSpan.textContent = fileName;
-    });
+    if (info.type === 'enumeration') {
+        input = document.createElement('select');
+        info.items.forEach(item => {
+            const opt = document.createElement('option');
+            opt.value = item.ID;
+            opt.textContent = item.VALUE;
+            input.appendChild(opt);
+        });
+        wrapper.appendChild(input); // Сразу добавляем в wrapper
+    } 
+    else if (info.type === 'file') {
+        const fileWrapper = document.createElement('div');
+        fileWrapper.style.display = 'flex';
+        fileWrapper.style.alignItems = 'center';
 
-    fileWrapper.appendChild(input);
-    fileWrapper.appendChild(label);
-    fileWrapper.appendChild(fileNameSpan);
-    wrapper.appendChild(fileWrapper);
-}
-                // input = document.createElement('input');
-                // input.type = info.type === 'file' ? 'file' : 'text';
-            }
+        input = document.createElement('input'); // Инициализируем наш input
+        input.type = 'file';
+        input.id = 'file_' + id;
+        input.className = 'file-input';
 
-            input.name = id;
-            input.style.width = "100%";
-            input.style.padding = "8px";
-            
-            wrapper.appendChild(input);
-            container.appendChild(wrapper);
+        const fileLabel = document.createElement('label'); // Переименовал в fileLabel, чтобы не путать с основным
+        fileLabel.htmlFor = 'file_' + id;
+        fileLabel.className = 'file-label';
+        fileLabel.textContent = 'Выберите файл';
+
+        const fileNameSpan = document.createElement('span');
+        fileNameSpan.className = 'file-name-display';
+        fileNameSpan.textContent = 'Файл не выбран';
+
+        input.addEventListener('change', (e) => {
+            const fileName = e.target.files[0] ? e.target.files[0].name : 'Файл не выбран';
+            fileNameSpan.textContent = fileName;
         });
 
-        console.log("--- Отрисовка завершена ---");
-
-    } catch (err) {
-        console.error("ПРОИЗОШЛА ОШИБКА:", err);
-        container.innerHTML = `<p style="color:red">Ошибка: ${err.message}</p>`;
+        fileWrapper.appendChild(input);
+        fileWrapper.appendChild(fileLabel);
+        fileWrapper.appendChild(fileNameSpan);
+        wrapper.appendChild(fileWrapper);
+    } 
+    else {
+        input = document.createElement('input');
+        input.type = info.type === 'number' ? 'number' : 'text';
+        wrapper.appendChild(input);
     }
-}
+
+    // Теперь эта строка сработает для всех типов, так как input везде определен
+    input.name = id; 
+    input.style.width = "100%"; 
+    // Для файла ширину лучше не форсировать, если он скрыт, но для порядка оставим
+    
+    container.appendChild(wrapper);
+});
 
 // Запускаем функцию
 loadForm();
