@@ -16,6 +16,7 @@ def get_fields():
     # Формируем запрос к Битрикс24
     method = "crm.item.fields"
     url = f"{BITRIX_URL}{method}?entityTypeId={entity_type_id}"
+   
     
     try:
         response = requests.get(url)
