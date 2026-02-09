@@ -1,3 +1,79 @@
+// 1. Глобальные переменные и параметры URL
+let currentBitrixUserId = null;
+const urlParams = new URLSearchParams(window.location.search);
+const tgNick = urlParams.get('tg');
+
+// 2. Функция инициализации (Проверка пользователя в Redis)
+async function initApp() {
+    const regContainer = document.getElementById('registration-container');
+    const dynamicForm = document.getElementById('dynamic-form');
+    const formContainer = document.getElementById('form-container');
+
+    if (!tgNick) {
+        formContainer.innerHTML = '<div style="color: #721c24; background: #f8d7da; padding: 15px; border-radius: 8px;">' +
+                                  '<b>Ошибка:</b> Пожалуйста, откройте форму через Telegram бота.</div>';
+        return;
+    }
+
+    try {
+        const response = await fetch(`/api/check_user?tg=${tgNick}`);
+        const data = await response.json();
+
+        if (data.status === 'found') {
+            currentBitrixUserId = data.bitrix_id;
+            // Прячем загрузку, показываем форму и загружаем поля из Битрикс
+            if (regContainer) regContainer.style.display = 'none';
+            if (dynamicForm) dynamicForm.style.display = 'block';
+            loadForm(); // Вызываем отрисовку полей
+        } else {
+            // Показываем окно регистрации
+            if (regContainer) regContainer.style.display = 'block';
+            if (dynamicForm) dynamicForm.style.display = 'none';
+        }
+    } catch (err) {
+        console.error("Ошибка инициализации:", err);
+    }
+}
+
+// 3. Функция сохранения нового пользователя в базу
+async function registerUser() {
+    const bitrixIdInput = document.getElementById('reg-bitrix-id');
+    const bitrixId = bitrixIdInput ? bitrixIdInput.value : null;
+    
+    if (!bitrixId) return alert("Введите ваш ID из Битрикс24!");
+
+    const btn = document.getElementById('reg-btn');
+    btn.disabled = true;
+    btn.textContent = 'Сохраняем...';
+
+    try {
+        const response = await fetch('/api/save_user', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ tg: tgNick, bitrix_id: bitrixId })
+        });
+
+        if (response.ok) {
+            alert("Аккаунт успешно привязан!");
+            location.reload(); // Перезагрузка, чтобы сработал initApp и открылась форма
+        }
+    } catch (err) {
+        alert("Ошибка при сохранении");
+    } finally {
+        btn.disabled = false;
+    }
+}
+
+// 4. Твоя основная функция загрузки полей
+async function loadForm() {
+    // ... (весь код loadForm, который мы писали ранее)
+}
+
+// 5. Вспомогательные функции (fileToBase64) и обработчик submit
+// ... (остальной код)
+
+// 6. САМЫЙ НИЗ ФАЙЛА: Запуск процесса
+initApp();
 async function loadForm() {
     console.log("--- Инициализация формы ---");
     

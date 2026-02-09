@@ -2,9 +2,34 @@ import os
 import requests
 from flask import Flask, jsonify, request
 from dotenv import load_dotenv
+from upstash_redis import Redis
 
 load_dotenv()
 app = Flask(__name__)
+
+redis = Redis.from_env()
+
+@app.route('/api/check_user')
+def check_user():
+    tg_nick = request.args.get('tg')
+    if not tg_nick:
+        return jsonify({"status": "error", "message": "No nickname"}), 400
+    
+    bitrix_id = redis.get(tg_nick)
+    if bitrix_id:
+        return jsonify({"status": "found", "bitrix_id": bitrix_id})
+    return jsonify({"status": "not_found"})
+
+@app.route('/api/save_user', methods=['POST'])
+def save_user():
+    data = request.json
+    tg_nick = data.get('tg')
+    bitrix_id = data.get('bitrix_id')
+    
+    if tg_nick and bitrix_id:
+        redis.set(tg_nick, bitrix_id)
+        return jsonify({"status": "success"})
+    return jsonify({"status": "error"}), 400
 
 # 1. Твой белый список полей (добавь сюда ID своих полей из Битрикса)
 ALLOWED_FIELDS = [

@@ -9,7 +9,22 @@
 <body>
 
     <div id="app">
+        <div id="registration-container" style="display: none;" class="fade-in">
+    <h3>Регистрация пользователя</h3>
+    <p style="font-size: 14px; color: #666;">Ваш Telegram ник не найден в системе. Пожалуйста, введите ваш ID из Битрикс24.</p>
+    <div class="field-group">
+        <label>Ваш ID в Битрикс24</label>
+        <input type="number" id="reg-bitrix-id" placeholder="Например: 125">
+    </div>
+    <button id="reg-btn" onclick="registerUser()">Привязать аккаунт</button>
+</div>
+
+<form id="dynamic-form" style="display: none;">
+    <div id="form-container"></div>
+    <button type="submit" id="submit-btn">Отправить</button>
+</form>
         <h3>Новая заявка</h3>
+
         
         <form id="dynamic-form">
     <div id="form-container"> <p>Загрузка полей...</p>
