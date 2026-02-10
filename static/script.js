@@ -1,18 +1,22 @@
+// 1. Инициализация Telegram
 const tele = window.Telegram.WebApp;
 tele.ready();
 tele.expand();
 
+// 2. Данные пользователя
 const tgUser = tele.initDataUnsafe?.user;
 const tgNick = tgUser?.username || tgUser?.id?.toString(); 
 let currentBitrixUserId = null;
 
+// 3. Главная функция проверки
 async function initApp() {
+    console.log("--- Запуск InitApp ---");
     const regWin = document.getElementById('registration-container');
     const mainForm = document.getElementById('dynamic-form');
+    const formContainer = document.getElementById('form-container');
 
     if (!tgNick) {
-        document.getElementById('form-container').innerHTML = 
-            "<div class='error'>Пожалуйста, откройте приложение через Telegram бота.</div>";
+        if (formContainer) formContainer.innerHTML = "<div class='error'>Откройте в Telegram</div>";
         return;
     }
 
@@ -22,19 +26,21 @@ async function initApp() {
 
         if (data.status === 'found') {
             currentBitrixUserId = data.bitrix_id;
-            regWin.style.display = 'none';
-            mainForm.style.display = 'block';
+            if (regWin) regWin.style.display = 'none';
+            if (mainForm) mainForm.style.display = 'block';
             await loadForm();
         } else {
-            regWin.style.display = 'block';
-            mainForm.style.display = 'none';
+            if (regWin) regWin.style.display = 'block';
+            if (mainForm) mainForm.style.display = 'none';
         }
     } catch (err) {
-        console.error("Ошибка входа:", err);
+        console.error("Ошибка при входе:", err);
     }
 }
 
+// 4. Отрисовка полей (возвращаем твой дизайн)
 async function loadForm() {
+    console.log("--- Загрузка полей ---");
     const container = document.getElementById('form-container');
     try {
         const response = await fetch('/api/get_fields');
@@ -44,74 +50,80 @@ async function loadForm() {
             container.innerHTML = '';
             Object.entries(data.fields).forEach(([id, info]) => {
                 const wrapper = document.createElement('div');
-                wrapper.className = 'field-group'; // Класс для твоего CSS
+                wrapper.className = 'field-group';
 
                 const label = document.createElement('label');
                 label.innerHTML = `<b>${info.title || id}</b>`;
                 wrapper.appendChild(label);
 
-                let input;
-                // 1. Обработка СПИСКОВОГО поля
+                // ЛОГИКА СПИСКОВ (Enumeration)
                 if (info.type === 'enumeration' && info.items) {
-                    input = document.createElement('select');
+                    const select = document.createElement('select');
+                    select.name = id;
                     info.items.forEach(item => {
                         const opt = document.createElement('option');
                         opt.value = item.ID;
                         opt.textContent = item.VALUE;
-                        input.appendChild(opt);
+                        select.appendChild(opt);
                     });
+                    wrapper.appendChild(select);
                 } 
-                // 2. Обработка ФАЙЛА (с твоим дизайном)
+                // ЛОГИКА ФАЙЛОВ (Твой дизайн)
                 else if (info.type === 'file') {
                     const fileWrapper = document.createElement('div');
                     fileWrapper.className = 'file-input-wrapper';
 
-                    input = document.createElement('input');
-                    input.type = 'file';
-                    input.id = 'file_' + id;
-                    input.className = 'file-input';
+                    const fileInput = document.createElement('input');
+                    fileInput.type = 'file';
+                    fileInput.id = 'file_' + id;
+                    fileInput.name = id;
+                    fileInput.className = 'file-input';
 
                     const fileLabel = document.createElement('label');
                     fileLabel.htmlFor = 'file_' + id;
                     fileLabel.className = 'file-label';
                     fileLabel.textContent = 'Выберите файл';
 
-                    fileWrapper.appendChild(input);
-                    fileWrapper.appendChild(fileLabel);
-                    wrapper.appendChild(fileWrapper);
-                    
-                    // Слушатель для изменения текста кнопки
-                    input.addEventListener('change', e => {
+                    fileInput.addEventListener('change', (e) => {
                         fileLabel.textContent = e.target.files[0]?.name || 'Выберите файл';
                     });
-                } 
-                // 3. ОБЫЧНОЕ поле
-                else {
-                    input = document.createElement('input');
-                    input.type = (info.type === 'number') ? 'number' : 'text';
-                }
 
-                if (info.type !== 'file') {
+                    fileWrapper.appendChild(fileInput);
+                    fileWrapper.appendChild(fileLabel);
+                    wrapper.appendChild(fileWrapper);
+                } 
+                // ОБЫЧНЫЕ ПОЛЯ
+                else {
+                    const input = document.createElement('input');
                     input.name = id;
+                    input.type = (info.type === 'number') ? 'number' : 'text';
                     wrapper.appendChild(input);
                 }
+
                 container.appendChild(wrapper);
             });
         }
     } catch (e) {
-        console.error("Ошибка отрисовки:", e);
+        console.error("Ошибка loadForm:", e);
     }
 }
 
+// 5. Функция регистрации
 async function registerUser() {
     const bitrixId = document.getElementById('reg-bitrix-id').value;
     if (!bitrixId) return alert("Введите ID!");
-    const response = await fetch('/api/save_user', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ tg: tgNick, bitrix_id: bitrixId })
-    });
-    if (response.ok) location.reload();
+
+    try {
+        const response = await fetch('/api/save_user', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ tg: tgNick, bitrix_id: bitrixId })
+        });
+        if (response.ok) location.reload();
+    } catch (e) {
+        console.error("Ошибка регистрации:", e);
+    }
 }
 
+// 6. ЗАПУСК
 document.addEventListener('DOMContentLoaded', initApp);
