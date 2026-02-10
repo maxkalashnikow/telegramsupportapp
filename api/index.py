@@ -61,6 +61,33 @@ def get_fields():
     except Exception as e:
         return jsonify({"status": "error", "message": str(e)}), 500
 
+@app.route('/api/create_ticket', methods=['POST'])
+def create_ticket():
+    if not BITRIX_URL:
+        return jsonify({"status": "error", "message": "BITRIX_URL is missing"}), 500
+    
+    try:
+        data = request.json  # Данные из формы
+        base_url = BITRIX_URL.strip().rstrip('/') + '/'
+        
+        # Для Смарт-процессов используется метод crm.item.add
+        api_method = f"{base_url}crm.item.add"
+        
+        payload = {
+            "entityTypeId": 1044,
+            "fields": data.get('fields', {})
+        }
+        
+        response = requests.post(api_method, json=payload, timeout=10)
+        result = response.json()
+        
+        if 'error' in result:
+            return jsonify({"status": "error", "message": result.get('error_description')}), 500
+            
+        return jsonify({"status": "success", "data": result})
+    except Exception as e:
+        return jsonify({"status": "error", "message": str(e)}), 500
+    
 # Роуты для Redis
 @app.route('/api/check_user')
 def check_user():
