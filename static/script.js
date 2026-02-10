@@ -104,3 +104,60 @@ async function loadForm() {
 
 // ЗАПУСК (ОБЯЗАТЕЛЬНО!)
 document.addEventListener('DOMContentLoaded', initApp);
+
+document.addEventListener('DOMContentLoaded', () => {
+    
+    // Кнопка "Зарегистрироваться" (в окне регистрации)
+    const regButton = document.querySelector('#registration-container button');
+    if (regButton) {
+        regButton.addEventListener('click', async () => {
+            const bitrixId = document.getElementById('bitrix-id').value;
+            if (!bitrixId) return alert('Введите ваш ID из Битрикс24');
+
+            const res = await fetch('/api/save_user', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ tg: tgNick, bitrix_id: bitrixId })
+            });
+            
+            if (res.ok) {
+                alert('Успешно! Теперь форма доступна.');
+                location.reload(); // Перезагружаем, чтобы открылась форма
+            }
+        });
+    }
+
+    // Кнопка "Отправить" (сама форма)
+    const form = document.getElementById('dynamic-form');
+    if (form) {
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            // Собираем данные
+            const formData = new FormData(form);
+            const fields = {};
+            formData.forEach((value, key) => {
+                fields[key] = value;
+            });
+
+            // Отправляем в Битрикс через наш API
+            try {
+                const response = await fetch('/api/create_ticket', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ fields: fields })
+                });
+
+                const result = await response.json();
+                if (result.status === 'success') {
+                    alert('Заявка создана!');
+                    if (window.Telegram?.WebApp) window.Telegram.WebApp.close();
+                } else {
+                    alert('Ошибка: ' + result.message);
+                }
+            } catch (err) {
+                alert('Ошибка сети: ' + err.message);
+            }
+        });
+    }
+});
