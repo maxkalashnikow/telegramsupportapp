@@ -1,19 +1,40 @@
-let currentBitrixUserId = null;
-const urlParams = new URLSearchParams(window.location.search);
-const tgNick = urlParams.get('tg');
+// Инициализация Telegram
+const tele = window.Telegram.WebApp;
+tele.ready();
 
-// 1. Отрисовка полей
+// ПОЛУЧАЕМ НИК (ТОЛЬКО ОДНО ОБЪЯВЛЕНИЕ)
+const tgUser = tele.initDataUnsafe?.user;
+const tgNick = tgUser?.username || tgUser?.id?.toString(); 
+
+async function initApp() {
+    console.log("--- Приложение запущено для:", tgNick);
+    const regWin = document.getElementById('registration-container');
+    const mainForm = document.getElementById('dynamic-form');
+
+    if (!tgNick) {
+        console.error("Ник не найден");
+        return;
+    }
+
+    try {
+        const response = await fetch(`/api/check_user?tg=${tgNick}`);
+        const data = await response.json();
+
+        if (data.status === 'found') {
+            if (regWin) regWin.style.display = 'none';
+            if (mainForm) mainForm.style.display = 'block';
+            loadForm(); // Загружаем твои поля
+        } else {
+            if (regWin) regWin.style.display = 'block';
+            if (mainForm) mainForm.style.display = 'none';
+        }
+    } catch (err) {
+        console.error("Ошибка инициализации:", err);
+    }
+}
+
 async function loadForm() {
-    console.log("--- Загрузка полей из Битрикс ---");
     const container = document.getElementById('form-container');
-    
-
-
-
-
-
-
-
     try {
         const response = await fetch('/api/get_fields');
         const data = await response.json();
@@ -29,200 +50,45 @@ async function loadForm() {
                 wrapper.appendChild(label);
 
                 let input;
-                if (info.type === 'file') {
-                    // Твоя красивая кнопка файла
+                if (info.type === 'enumeration' && info.items) {
+                    input = document.createElement('select');
+                    info.items.forEach(item => {
+                        const opt = document.createElement('option');
+                        opt.value = item.ID;
+                        opt.textContent = item.VALUE;
+                        input.appendChild(opt);
+                    });
+                } else if (info.type === 'file') {
+                    // ТВОЙ ДИЗАЙН ФАЙЛА
                     const fileWrapper = document.createElement('div');
                     fileWrapper.className = 'file-input-wrapper';
                     input = document.createElement('input');
                     input.type = 'file';
                     input.id = 'file_' + id;
                     input.className = 'file-input';
-                    
                     const fLabel = document.createElement('label');
                     fLabel.htmlFor = 'file_' + id;
                     fLabel.className = 'file-label';
                     fLabel.textContent = 'Выберите файл';
-                    
                     fileWrapper.appendChild(input);
                     fileWrapper.appendChild(fLabel);
                     wrapper.appendChild(fileWrapper);
                 } else {
                     input = document.createElement('input');
-                    input.type = info.type === 'number' ? 'number' : 'text';
-                    wrapper.appendChild(input);
+                    input.type = 'text';
                 }
-                input.name = id;
+
+                if (input) {
+                    input.name = id;
+                    if (info.type !== 'file') wrapper.appendChild(input);
+                }
                 container.appendChild(wrapper);
             });
         }
     } catch (e) {
-        console.error("Ошибка loadForm:", e);
+        console.error("Ошибка загрузки полей:", e);
     }
 }
 
-// 2. Регистрация
-async function registerUser() {
-    const bitrixId = document.getElementById('reg-bitrix-id').value;
-    if (!bitrixId) return alert("Введите ID!");
-
-    const response = await fetch('/api/save_user', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ tg: tgNick, bitrix_id: bitrixId })
-    });
-
-    if (response.ok) {
-        alert("Зарегистрировано!");
-        location.reload();
-
-
-
-
-
-
-
-
-
-
-
-
-    }
-}
-
-// 3. Инициализация при загрузке
-async function initApp() {
-    console.log("Проверка ника:", tgNick);
-    const regWin = document.getElementById('registration-container');
-    const mainForm = document.getElementById('dynamic-form');
-
-
-
-    if (!tgNick) {
-        document.getElementById('form-container').innerHTML = "Ошибка: откройте через бота (?tg=nick)";
-
-
-
-
-
-
-        return;
-    }
-
-    try {
-        const res = await fetch(`/api/check_user?tg=${tgNick}`);
-        const data = await res.json();
-
-
-        if (data.status === 'found') {
-            currentBitrixUserId = data.bitrix_id;
-            regWin.style.display = 'none';
-            mainForm.style.display = 'block';
-            await loadForm();
-
-   } else {
-            regWin.style.display = 'block';
-            mainForm.style.display = 'none';
-        }
-    } catch (e) {
-        console.error("Ошибка initApp:", e);
-
-
-
-    }
-}
-
-// Запуск
-initApp();
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+// ЗАПУСК (ОБЯЗАТЕЛЬНО!)
+document.addEventListener('DOMContentLoaded', initApp);
