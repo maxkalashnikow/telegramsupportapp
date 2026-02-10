@@ -7,30 +7,42 @@ const tgUser = tele.initDataUnsafe?.user;
 const tgNick = tgUser?.username || tgUser?.id?.toString(); 
 
 async function initApp() {
-    console.log("--- Приложение запущено для:", tgNick);
+    
+    //Временный код для отладки без проверки юзера, чтобы не мешало при разработке
     const regWin = document.getElementById('registration-container');
     const mainForm = document.getElementById('dynamic-form');
 
-    if (!tgNick) {
-        console.error("Ник не найден");
-        return;
-    }
+    // ВРЕМЕННО: Скрываем регистрацию и показываем форму сразу
+    if (regWin) regWin.style.display = 'none';
+    if (mainForm) mainForm.style.display = 'block';
+    
+    // Просто загружаем поля без лишних проверок
+    loadForm();
+    // Код для проверки юзера
+    // console.log("--- Приложение запущено для:", tgNick);
+    // const regWin = document.getElementById('registration-container');
+    // const mainForm = document.getElementById('dynamic-form');
 
-    try {
-        const response = await fetch(`/api/check_user?tg=${tgNick}`);
-        const data = await response.json();
+    // if (!tgNick) {
+    //     console.error("Ник не найден");
+    //     return;
+    // }
 
-        if (data.status === 'found') {
-            if (regWin) regWin.style.display = 'none';
-            if (mainForm) mainForm.style.display = 'block';
-            loadForm(); // Загружаем твои поля
-        } else {
-            if (regWin) regWin.style.display = 'block';
-            if (mainForm) mainForm.style.display = 'none';
-        }
-    } catch (err) {
-        console.error("Ошибка инициализации:", err);
-    }
+    // try {
+    //     const response = await fetch(`/api/check_user?tg=${tgNick}`);
+    //     const data = await response.json();
+
+    //     if (data.status === 'found') {
+    //         if (regWin) regWin.style.display = 'none';
+    //         if (mainForm) mainForm.style.display = 'block';
+    //         loadForm(); // Загружаем твои поля
+    //     } else {
+    //         if (regWin) regWin.style.display = 'block';
+    //         if (mainForm) mainForm.style.display = 'none';
+    //     }
+    // } catch (err) {
+    //     console.error("Ошибка инициализации:", err);
+    // }
 }
 
 async function loadForm() {
