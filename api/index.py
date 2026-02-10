@@ -23,22 +23,7 @@ def save_user():
     redis.set(data.get('tg'), data.get('bitrix_id'))
     return jsonify({"status": "success"})
 
-@app.route('/api/get_fields')
-
-from flask import Flask, jsonify, request
-import os
-import requests
-from upstash_redis import Redis
-
-app = Flask(__name__)
-
-# Берем вебхук из переменных окружения Vercel
-BITRIX_WEBHOOK = os.environ.get("BITRIX_WEBHOOK")
-
-def get_redis():
-    # Используем переменные KV для Redis
-    return Redis(url=os.environ.get("KV_REST_API_URL"), token=os.environ.get("KV_REST_API_TOKEN"))
-
+BITRIX_WEBHOOK = os.environ.get("BITRIX_URL")
 @app.route('/api/get_fields')
 def get_fields():
     if not BITRIX_WEBHOOK:
