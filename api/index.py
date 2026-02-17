@@ -7,6 +7,7 @@ app = Flask(__name__)
 
 # Берем URL из твоего шаблона ENV
 BITRIX_URL = os.environ.get("BITRIX_URL")
+entity_type_id = int(os.environ.get("ENTITY_TYPE_ID", 0))
 
 def get_redis():
     return Redis(url=os.environ.get("KV_REST_API_URL"), token=os.environ.get("KV_REST_API_TOKEN"))
@@ -17,9 +18,7 @@ def get_fields():
         return jsonify({"status": "error", "message": "BITRIX_URL is missing in ENV"}), 500
 
     try:
-        # Используем статичный ID процесса, как ты указал
-        entity_type_id = int(os.environ.get("ENTITY_TYPE_ID", 0))
-        
+                
         # Формируем корректный путь к методу
         base_url = BITRIX_URL.strip()
         if not base_url.endswith('/'):
@@ -73,7 +72,7 @@ def create_ticket():
         api_method = f"{base_url}crm.item.add"
         
         payload = {
-            "entityTypeId": 1044,
+            "entityTypeId": entity_type_id,
             "fields": data.get('fields', {})
         }
         
@@ -104,3 +103,17 @@ def save_user():
         redis.set(data.get('tg'), data.get('bitrix_id'))
         return jsonify({"status": "success"})
     return jsonify({"status": "error"}), 400
+
+@app.route('/api/delete_user', methods=['POST'])
+def delete_user():
+    try:
+        redis = get_redis()
+        data = request.json
+        tg_nick = data.get('tg')
+        
+        if tg_nick:
+            redis.delete(tg_nick) # Удаляем ключ из базы
+            return jsonify({"status": "success", "message": "Пользователь удален"})
+        return jsonify({"status": "error", "message": "Ник не указан"}), 400
+    except Exception as e:
+        return jsonify({"status": "error", "message": str(e)}), 500

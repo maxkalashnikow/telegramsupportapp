@@ -161,3 +161,33 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 });
+
+// Находим кнопку
+const deleteBtn = document.getElementById('btn-delete-me');
+
+if (deleteBtn) {
+    deleteBtn.addEventListener('click', async () => {
+        // Подтверждение, чтобы не удалить случайно
+        if (!confirm("Вы уверены, что хотите выйти и удалить свой ID из базы?")) return;
+
+        try {
+            const response = await fetch('/api/delete_user', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ tg: tgNick })
+            });
+
+            const result = await response.json();
+
+            if (result.status === 'success') {
+                alert("Данные удалены. Приложение будет перезагружено.");
+                location.reload(); // После перезагрузки снова появится окно регистрации
+            } else {
+                alert("Ошибка: " + result.message);
+            }
+        } catch (err) {
+            console.error("Ошибка при удалении:", err);
+            alert("Не удалось связаться с сервером.");
+        }
+    });
+}
