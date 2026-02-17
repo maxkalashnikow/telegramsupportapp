@@ -7,13 +7,11 @@
     <link rel="stylesheet" href="/static/style.css">
 </head>
 <body>
-    <div class="container">
-        <div id="registration-container" style="display:none;">
-            <h2>Первый вход</h2>
-            <p>Введите ваш ID из Битрикс24 для привязки аккаунта:</p>
-            <input type="number" id="reg-bitrix-id" placeholder="Ваш ID (например 123)">
-            <button onclick="registerUser()">Привязать аккаунт</button>
-        </div>
+    <div id="registration-container" style="display:none;">
+    <h2>Регистрация</h2>
+    <input type="number" id="reg-bitrix-id" placeholder="Ваш ID в Битрикс24">
+    <button id="reg-btn">Войти</button>
+</div>
 
         <form id="dynamic-form" style="display:none;">
             <h2>Создать тикет</h2>
