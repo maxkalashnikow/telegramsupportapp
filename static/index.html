@@ -12,16 +12,18 @@
     <input type="number" id="reg-bitrix-id" placeholder="Ваш ID в Битрикс24">
     <button id="reg-btn">Войти</button>
 </div>
+<div id="main-container">
+    <form id="dynamic-form" style="display:none;">
+        <div id="form-container"></div>
+        <button type="submit" class="btn-primary">Отправить заявку</button>
+    </form>
 
-        <form id="dynamic-form" style="display:none;">
-            <h2>Создать тикет</h2>
-            <div id="form-container">Загрузка полей...</div>
-            <button type="submit">Отправить в поддержку</button>
-        </form>
-         <button id="btn-delete-me" class="btn-secondary" style="background-color: #ff4d4d; color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer;">
+    <div class="footer-actions">
+        <button id="btn-delete-me" class="btn-delete">
             Удалить мой аккаунт из базы
         </button>
     </div>
+</div>
     <div style="margin-top: 50px; padding: 20px; text-align: center;">
        
     </div>

@@ -157,3 +157,27 @@ input:focus, select:focus {
     from { opacity: 0; transform: translateY(10px); }
     to { opacity: 1; transform: translateY(0); }
 }
+
+.footer-actions {
+    margin-top: 60px;    /* Большой отступ от формы */
+    padding-bottom: 40px; /* Отступ от самого края экрана (для iOS) */
+    text-align: center;
+    display: flex;
+    justify-content: center;
+}
+
+.btn-delete {
+    background-color: transparent;
+    color: #ff4d4f;       /* Неяркий красный цвет */
+    border: 1px solid #ff4d4f;
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-size: 14px;
+    opacity: 0.7;         /* Делаем её полупрозрачной, чтобы не отвлекала */
+    transition: 0.3s;
+}
+
+.btn-delete:hover {
+    opacity: 1;
+    background-color: #fff1f0;
+}
