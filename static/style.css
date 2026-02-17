@@ -1,30 +1,42 @@
 :root {
-    --primary-color: #2fc6f6; /* Фирменный голубой Битрикса */
+    --primary-color: #2fc6f6;    /* Фирменный голубой Битрикса */
     --hover-color: #0b93bf;
+    --danger-color: #ff4d4f;     /* Красный для удаления */
     --bg-color: #f4f7f9;
     --text-color: #333;
+    --border-color: #ddecfa;
     --border-radius: 8px;
+    --box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+}
+
+/* 1. Базовые настройки и фиксы iOS */
+* {
+    box-sizing: border-box;
 }
 
 body {
     font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
     background-color: var(--bg-color);
     color: var(--text-color);
-    display: flex;
-    justify-content: center;
-    align-items: flex-start;
-    min-height: 100vh;
     margin: 0;
-    padding: 40px 20px;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: 100vh;
+    /* Фикс для корректного отображения на iPhone */
+    height: -webkit-fill-available; 
 }
 
+/* 2. Контейнер приложения */
 #app {
     background: #fff;
     padding: 30px;
     border-radius: 12px;
-    box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+    box-shadow: var(--box-shadow);
     width: 100%;
     max-width: 500px;
+    margin-top: 20px;
 }
 
 h3 {
@@ -37,8 +49,10 @@ h3 {
     display: inline-block;
 }
 
+/* 3. Поля формы */
 .field-group {
     margin-bottom: 20px;
+    width: 100%;
 }
 
 label {
@@ -55,12 +69,11 @@ select,
 textarea {
     width: 100%;
     padding: 12px 15px;
-    border: 1px solid #ddecfa;
+    border: 1px solid var(--border-color);
     border-radius: var(--border-radius);
     font-size: 15px;
-    box-sizing: border-box;
-    transition: border-color 0.2s, box-shadow 0.2s;
     background-color: #fcfdfe;
+    transition: all 0.2s ease;
 }
 
 input:focus, select:focus {
@@ -69,7 +82,12 @@ input:focus, select:focus {
     box-shadow: 0 0 0 3px rgba(47, 198, 246, 0.1);
     background-color: #fff;
 }
-/* Скрываем стандартный неуклюжий инпут */
+
+/* 4. Работа с файлами */
+.file-input-wrapper {
+    margin-top: 10px;
+}
+
 .file-input {
     width: 0.1px;
     height: 0.1px;
@@ -79,41 +97,31 @@ input:focus, select:focus {
     z-index: -1;
 }
 
-/* Стилизуем label как красивую кнопку */
 .file-label {
     display: inline-flex;
     align-items: center;
     padding: 10px 20px;
-    background-color: #2fc6f6;
+    background-color: var(--primary-color);
     color: white;
     border-radius: var(--border-radius);
     cursor: pointer;
     font-weight: 600;
+    font-size: 14px;
     transition: all 0.2s ease;
-    border: 1px solid #2fc6f6;
 }
 
-.file-label:hover {
-    background-color: #0b93bf;
-    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-}
-
-/* Иконка облака (через CSS символ или SVG) */
 .file-label::before {
-    content: '☁'; /* Можно заменить на иконку из FontAwesome */
+    content: '☁';
     margin-right: 10px;
     font-size: 18px;
 }
 
-/* Место для отображения имени выбранного файла */
-.file-name-display {
-    margin-left: 15px;
-    font-size: 14px;
-    color: #666;
-    font-style: italic;
+.file-label:hover {
+    background-color: var(--hover-color);
 }
-/* Стилизация кнопки */
-#submit-btn {
+
+/* 5. Кнопки действий */
+.btn-primary {
     width: 100%;
     padding: 14px;
     background-color: var(--primary-color);
@@ -123,32 +131,47 @@ input:focus, select:focus {
     font-size: 16px;
     font-weight: 600;
     cursor: pointer;
-    transition: background-color 0.2s, transform 0.1s;
+    transition: all 0.2s;
     margin-top: 10px;
 }
 
-#submit-btn:hover {
+.btn-primary:hover {
     background-color: var(--hover-color);
 }
 
-#submit-btn:active {
+.btn-primary:active {
     transform: scale(0.98);
 }
 
-#submit-btn:disabled {
-    background-color: #ccc;
-    cursor: not-allowed;
+/* 6. ФУТЕР (Кнопка удаления) */
+.footer-actions {
+    margin-top: auto; /* Прижимает к низу, если контента мало */
+    padding: 40px 0;
+    width: 100%;
+    max-width: 500px;
+    display: flex;
+    justify-content: center; /* Строго по центру */
 }
 
-/* Индикатор загрузки в контейнере */
-#form-container p {
-    color: #888;
-    font-style: italic;
-    text-align: center;
-    padding: 20px;
+.btn-delete {
+    background-color: transparent;
+    color: var(--danger-color);
+    border: 1px solid var(--danger-color);
+    padding: 10px 20px;
+    border-radius: var(--border-radius);
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    opacity: 0.6;
+    transition: all 0.3s ease;
 }
 
-/* Анимация появления полей */
+.btn-delete:hover {
+    opacity: 1;
+    background-color: #fff1f0;
+}
+
+/* 7. Анимации */
 .fade-in {
     animation: fadeIn 0.4s ease-in;
 }
@@ -156,28 +179,4 @@ input:focus, select:focus {
 @keyframes fadeIn {
     from { opacity: 0; transform: translateY(10px); }
     to { opacity: 1; transform: translateY(0); }
-}
-
-.footer-actions {
-    margin-top: 60px;    /* Большой отступ от формы */
-    padding-bottom: 40px; /* Отступ от самого края экрана (для iOS) */
-    text-align: center;
-    display: flex;
-    justify-content: center;
-}
-
-.btn-delete {
-    background-color: transparent;
-    color: #ff4d4f;       /* Неяркий красный цвет */
-    border: 1px solid #ff4d4f;
-    padding: 8px 16px;
-    border-radius: 8px;
-    font-size: 14px;
-    opacity: 0.7;         /* Делаем её полупрозрачной, чтобы не отвлекала */
-    transition: 0.3s;
-}
-
-.btn-delete:hover {
-    opacity: 1;
-    background-color: #fff1f0;
 }
