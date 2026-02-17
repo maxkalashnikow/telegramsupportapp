@@ -18,11 +18,7 @@ def get_fields():
 
     try:
         # Используем статичный ID процесса, как ты указал
-<<<<<<< HEAD
-        entity_type_id = 1044 
-=======
-        entity_type_id = os.environ.get("ENTITY_TYPE_ID")
->>>>>>> AI
+        entity_type_id = int(os.environ.get("ENTITY_TYPE_ID", 0))
         
         # Формируем корректный путь к методу
         base_url = BITRIX_URL.strip()
