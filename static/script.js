@@ -111,7 +111,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const regButton = document.querySelector('#registration-container button');
     if (regButton) {
         regButton.addEventListener('click', async () => {
-            const bitrixId = document.getElementById('bitrix-id').value;
+            const bitrixId = document.getElementById('reg-bitrix-id').value;
             if (!bitrixId) return alert('Введите ваш ID из Битрикс24');
 
             const res = await fetch('/api/save_user', {
