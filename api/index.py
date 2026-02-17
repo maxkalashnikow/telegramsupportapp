@@ -40,8 +40,7 @@ def get_fields():
 
         all_fields = bitrix_data.get('result', {}).get('fields', {})
         
-        # ТВОИ РЕАЛЬНЫЕ ID (ufCrm13_...), которые нельзя удалять
-        target_ids = ['title', 'ufCrm13_1764583266', 'ufCrm13_1764583294']
+        target_ids = os.getenv("TARGET_IDS", "").split(',')
         
         result_fields = {}
         for field_id in target_ids:
