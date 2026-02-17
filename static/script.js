@@ -23,26 +23,26 @@ async function initApp() {
     // const regWin = document.getElementById('registration-container');
     // const mainForm = document.getElementById('dynamic-form');
 
-    // if (!tgNick) {
-    //     console.error("Ник не найден");
-    //     return;
-    // }
+    if (!tgNick) {
+        console.error("Ник не найден");
+        return;
+    }
 
-    // try {
-    //     const response = await fetch(`/api/check_user?tg=${tgNick}`);
-    //     const data = await response.json();
+    try {
+        const response = await fetch(`/api/check_user?tg=${tgNick}`);
+        const data = await response.json();
 
-    //     if (data.status === 'found') {
-    //         if (regWin) regWin.style.display = 'none';
-    //         if (mainForm) mainForm.style.display = 'block';
-    //         loadForm(); // Загружаем твои поля
-    //     } else {
-    //         if (regWin) regWin.style.display = 'block';
-    //         if (mainForm) mainForm.style.display = 'none';
-    //     }
-    // } catch (err) {
-    //     console.error("Ошибка инициализации:", err);
-    // }
+        if (data.status === 'found') {
+            if (regWin) regWin.style.display = 'none';
+            if (mainForm) mainForm.style.display = 'block';
+            loadForm(); // Загружаем твои поля
+        } else {
+            if (regWin) regWin.style.display = 'block';
+            if (mainForm) mainForm.style.display = 'none';
+        }
+    } catch (err) {
+        console.error("Ошибка инициализации:", err);
+    }
 }
 
 async function loadForm() {
